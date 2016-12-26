@@ -1,6 +1,5 @@
 extern crate eightchip;
 
-use std::mem;
 use eightchip::chip8::Chip8;
 
 fn main() {
