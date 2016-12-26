@@ -3,7 +3,6 @@ fn read_from_slice(slice: &[u8]) -> u16 {
 }
 
 //TODO: Change this to represent actual instructions
-#[derive(Clone, Copy)]
 pub struct Instruction {
     opcode: u16,
 }
@@ -21,16 +20,14 @@ impl super::Chip8 {
         }
     }
 
-    pub fn execute_instruction(&mut self, instruction: Instruction) {
+    pub fn execute_instruction(&mut self, instruction: &Instruction) {
         //dummy implementation
         println!("executing opcode: {}", instruction.opcode);
     }
 
-    pub fn increment_counter(&mut self, instruction: Instruction) {
+    pub fn increment_counter(&mut self, opcode: u16) {
         //memory is byte-addressed, instructions are 2 bytes long
         //for some operations we might want to not increment the counter
         self.registers.program_counter += 2;
     }
 }
-
-    

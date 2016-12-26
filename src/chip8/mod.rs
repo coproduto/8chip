@@ -28,8 +28,8 @@ impl Chip8 {
         let opcode = self.fetch_instruction();
         let instruction = self.decode_instruction(opcode);
         
-        self.execute_instruction(instruction);
-        self.increment_counter(instruction);
+        self.execute_instruction(&instruction);
+        self.increment_counter(opcode);
 
         self.timers.timer_cycle();
     }
