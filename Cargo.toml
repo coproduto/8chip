@@ -1,5 +1,5 @@
 [package]
-name = "8chip"
+name = "eightchip"
 version = "0.1.0"
 authors = ["Pedro Castilho <cstl.px@gmail.com>"]
 
