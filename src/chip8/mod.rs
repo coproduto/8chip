@@ -40,6 +40,6 @@ impl Chip8 {
     }
 }
 
-fn read_from_slice(slice: &[u8]) -> u16 {
+pub fn read_from_slice(slice: &[u8]) -> u16 {
     (slice[0] as u16) << 8 | (slice[1] as u16)
 }

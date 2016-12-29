@@ -8,3 +8,10 @@ gfx = "0.13"
 synth = "0.10"
 glutin = "*"
 gfx_window_glutin = "*"
+
+[dev_dependencies]
+quickcheck = "0.4"
+
+[profile.release]
+lto = true
+panic = 'abort'
