@@ -15,3 +15,20 @@ impl Registers {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    quickcheck! {
+        fn test_new_registers() -> bool {
+            let regs = Registers::new();
+            let mut v = regs.general.iter();
+
+            regs.program_counter == 0x200
+                && regs.index == 0
+                && regs.stack_pointer == 0
+                && v.all(|x| { *x == 0 })
+        }
+    }
+}

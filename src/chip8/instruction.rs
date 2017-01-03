@@ -23,3 +23,26 @@ impl Instruction {
         chip.registers.program_counter += 2;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    quickcheck! {
+        fn test_instruction_decode(opcode: u16) -> bool {
+            let i = Instruction::decode(opcode);
+            i.opcode == opcode
+        }
+
+        fn test_increment_counter(opcode: u16) -> bool {
+            let i = Instruction::decode(opcode);
+            let mut chip = super::super::Chip8::new();
+            let pc = chip.registers.program_counter;
+
+            i.increment_counter(&mut chip);
+
+            chip.registers.program_counter > pc
+        }
+
+    }
+}
