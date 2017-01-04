@@ -6,8 +6,8 @@ authors = ["Pedro Castilho <cstl.px@gmail.com>"]
 [dependencies]
 gfx = "0.13"
 synth = "0.10"
-glutin = "*"
-gfx_window_glutin = "*"
+glfw = "*"
+gfx_window_glfw = "*"
 
 [dev_dependencies]
 quickcheck = "0.4"

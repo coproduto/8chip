@@ -1,9 +1,11 @@
 #[macro_use]
 extern crate gfx;
-extern crate gfx_window_glutin;
-extern crate glutin;
+extern crate gfx_window_glfw;
+extern crate glfw;
 
 extern crate eightchip;
+
+use glfw::{Action, Context, Key};
 
 use gfx::traits::FactoryExt;
 use gfx::Device;
@@ -34,15 +36,26 @@ const TRIANGLE: [Vertex; 3] = [
 const CLEAR_COLOR: [f32; 4] = [0.1, 0.2, 0.3, 1.0];
 
 fn main() {
-    let builder = glutin::WindowBuilder::new()
-        .with_title("8CHIP".to_string())
-        .with_dimensions(1024, 768)
-        .with_vsync();
+    let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS)
+        .ok().expect("Failed to initialize GLFW");
+
+    glfw.window_hint(glfw::WindowHint::ContextVersion(3, 2));
+    glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
+    glfw.window_hint(glfw::WindowHint::OpenGlProfile(glfw::OpenGlProfileHint::Core));
+
+    let (mut window, events) = glfw
+        .create_window(800, 600, "8CHIP", glfw::WindowMode::Windowed)
+        .expect("Failed to create GLFW Window");
+
+    window.set_key_polling(true);
+    window.make_current();
     
-    let (window, mut device, mut factory, main_color, _main_depth) =
-        gfx_window_glutin::init::<ColorFormat, DepthFormat>(builder);
+    glfw.set_error_callback(glfw::FAIL_ON_ERRORS);
+
+    let (device, mut factory, color_view, depth_view) =
+        gfx_window_glfw::init(&mut window);
     
-    let mut encoder: gfx::Encoder<_, _> = factory.create_command_buffer().into();
+    /*let mut encoder: gfx::Encoder<_, _> = factory.create_command_buffer().into();
     let pso = factory.create_pipeline_simple(
         include_bytes!("shader/triangle_150.glslv"),
         include_bytes!("shader/triangle_150.glslf"),
@@ -52,23 +65,23 @@ fn main() {
     let data = pipe::Data {
         vbuf: vertex_buffer,
         out: main_color
-    };
+    };*/
     
     let chip8 = Chip8::new();
 
     'main: loop {
-        for event in window.poll_events() {
+        glfw.poll_events();
+        for (_, event) in glfw::flush_messages(&events) {
             match event {
-                glutin::Event::KeyboardInput(_, _, Some(glutin::VirtualKeyCode::Escape)) |
-                glutin::Event::Closed => break 'main,
+                glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => break 'main,
                 _ => {},
             }
         }
 
-        encoder.clear(&data.out, CLEAR_COLOR);
+        /*encoder.clear(&data.out, CLEAR_COLOR);
         encoder.draw(&slice, &pso, &data);
         //encoder.flush(&mut device);
         window.swap_buffers().unwrap();
-        device.cleanup();
+        device.cleanup();*/
     }
 }
