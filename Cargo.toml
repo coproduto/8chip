@@ -4,10 +4,10 @@ version = "0.1.0"
 authors = ["Pedro Castilho <cstl.px@gmail.com>"]
 
 [dependencies]
-gfx = "0.13"
+gfx = "0.16"
 synth = "0.10"
-glfw = "*"
-gfx_window_glfw = "*"
+glutin = "0.8"
+gfx_window_glutin = "0.16"
 
 [dev_dependencies]
 quickcheck = "0.4"

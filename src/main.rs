@@ -1,21 +1,19 @@
 #[macro_use]
 extern crate gfx;
-extern crate gfx_window_glfw;
-extern crate glfw;
+extern crate gfx_window_glutin;
+extern crate glutin;
 
 extern crate eightchip;
 
-use glfw::{Action, Context, Key};
+use eightchip::chip8::Chip8;
 
 use gfx::traits::FactoryExt;
 use gfx::Device;
 
-use eightchip::chip8::Chip8;
-
 pub type ColorFormat = gfx::format::Rgba8;
 pub type DepthFormat = gfx::format::DepthStencil;
 
-gfx_defines! {
+gfx_defines!{
     vertex Vertex {
         pos: [f32; 2] = "a_Pos",
         color: [f32; 3] = "a_Color",
@@ -28,60 +26,54 @@ gfx_defines! {
 }
 
 const TRIANGLE: [Vertex; 3] = [
-    Vertex { pos: [ -0.5, -0.5 ], color: [ 1.0, 0.0, 0.0 ] },
-    Vertex { pos: [  0.5, -0.5 ], color: [ 0.0, 1.0, 0.0 ] },
-    Vertex { pos: [  0.0,  0.5 ], color: [ 0.0, 0.0, 1.0 ] }
+    Vertex { pos: [ -0.5, -0.5 ], color: [1.0, 0.0, 0.0] },
+    Vertex { pos: [  0.5, -0.5 ], color: [0.0, 1.0, 0.0] },
+    Vertex { pos: [  0.0,  0.5 ], color: [0.0, 0.0, 1.0] }
 ];
 
 const CLEAR_COLOR: [f32; 4] = [0.1, 0.2, 0.3, 1.0];
 
 fn main() {
-    let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS)
-        .ok().expect("Failed to initialize GLFW");
-
-    glfw.window_hint(glfw::WindowHint::ContextVersion(3, 2));
-    glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
-    glfw.window_hint(glfw::WindowHint::OpenGlProfile(glfw::OpenGlProfileHint::Core));
-
-    let (mut window, events) = glfw
-        .create_window(800, 600, "8CHIP", glfw::WindowMode::Windowed)
-        .expect("Failed to create GLFW Window");
-
-    window.set_key_polling(true);
-    window.make_current();
-    
-    glfw.set_error_callback(glfw::FAIL_ON_ERRORS);
-
-    let (device, mut factory, color_view, depth_view) =
-        gfx_window_glfw::init(&mut window);
-    
-    /*let mut encoder: gfx::Encoder<_, _> = factory.create_command_buffer().into();
+    let events_loop = glutin::EventsLoop::new();
+    let builder = glutin::WindowBuilder::new()
+        .with_title("Triangle example".to_string())
+        .with_dimensions(1024, 768)
+        .with_vsync();
+    let (window, mut device, mut factory, main_color, mut main_depth) =
+        gfx_window_glutin::init::<ColorFormat, DepthFormat>(builder, &events_loop);
+    let mut encoder: gfx::Encoder<_, _> = factory.create_command_buffer().into();
     let pso = factory.create_pipeline_simple(
         include_bytes!("shader/triangle_150.glslv"),
         include_bytes!("shader/triangle_150.glslf"),
         pipe::new()
     ).unwrap();
     let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&TRIANGLE, ());
-    let data = pipe::Data {
+    let mut data = pipe::Data {
         vbuf: vertex_buffer,
         out: main_color
-    };*/
-    
+    };
+
     let chip8 = Chip8::new();
 
-    'main: loop {
-        glfw.poll_events();
-        for (_, event) in glfw::flush_messages(&events) {
+    let mut running = true;
+    while running {
+        // fetch events
+        events_loop.poll_events(|glutin::Event::WindowEvent{window_id: _, event}| {
             match event {
-                glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => break 'main,
+                glutin::WindowEvent::KeyboardInput(_, _, Some(glutin::VirtualKeyCode::Escape), _) |
+                glutin::WindowEvent::Closed => running = false,
+                glutin::WindowEvent::Resized(_width, _height) => {
+                    gfx_window_glutin::update_views(&window, &mut data.out, &mut main_depth);
+                },
                 _ => {},
             }
-        }
+        });
 
-        /*encoder.clear(&data.out, CLEAR_COLOR);
+        // draw a frame
+        encoder.clear(&data.out, CLEAR_COLOR);
         encoder.draw(&slice, &pso, &data);
-        //encoder.flush(&mut device);
+        encoder.flush(&mut device);
         window.swap_buffers().unwrap();
-        device.cleanup();*/
-    }
+        device.cleanup();
+    }    
 }
